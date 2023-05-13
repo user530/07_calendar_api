@@ -18,14 +18,30 @@ require("express-async-errors");
 const connect_1 = __importDefault(require("./db/connect"));
 const routers_1 = require("./routers");
 const middleware_1 = require("./middleware");
+const cors_1 = __importDefault(require("cors"));
+const helmet_1 = __importDefault(require("helmet"));
+const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
-// Input sanitizer
+// Input sanitizers modules
+const xss = require('xss-clean');
 const sanitizer = require('express-mongo-sanitize');
+// Security
+app.use((0, cors_1.default)());
+app.use((0, helmet_1.default)());
+// Request limiter (500 req/ 15min)
+const limiter = (0, express_rate_limit_1.default)({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+app.use(limiter);
 // JSON body parser
 app.use(express_1.default.json());
-// Sanitizer
+// Input sanitizers
 app.use(sanitizer());
+app.use(xss());
 // Routers
 app.use('/', routers_1.mainRouter);
 app.use('/api/v1/interviews', routers_1.interviewRouter);
