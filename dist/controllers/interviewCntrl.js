@@ -27,15 +27,12 @@ const getRangeInterviews = (req, res) => __awaiter(void 0, void 0, void 0, funct
     const { start, end } = params;
     if (!start || !end)
         throw new errors_1.BadRequest('Please, provide parameters "start" and "end" to specify the range!');
-    if (typeof start !== 'string' ||
-        typeof end !== 'string' ||
-        !new Date(start) ||
-        !new Date(end))
+    if (typeof start !== 'string' || typeof end !== 'string')
         throw new errors_1.BadRequest('Incorrect input format for the range parameters!');
     const rangeInterviews = yield models_1.InterviewModel.find({
         date: {
-            $gte: new Date(start),
-            $lte: new Date(end),
+            $gte: new Date(parseInt(start)),
+            $lte: new Date(parseInt(end)),
         },
     }, { createdAt: 0, updatedAt: 0, __v: 0 });
     res.status(http_status_codes_1.StatusCodes.OK).json({ success: true, data: rangeInterviews });

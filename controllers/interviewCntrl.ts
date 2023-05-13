@@ -16,6 +16,7 @@ export const getAllInterviews = async (req: Request, res: Response) => {
 
 export const getRangeInterviews = async (req: Request, res: Response) => {
   const params = req.query;
+
   if (!params) throw new BadRequest('No request parameters were provided!');
 
   const { start, end } = params;
@@ -25,19 +26,14 @@ export const getRangeInterviews = async (req: Request, res: Response) => {
       'Please, provide parameters "start" and "end" to specify the range!'
     );
 
-  if (
-    typeof start !== 'string' ||
-    typeof end !== 'string' ||
-    !new Date(start) ||
-    !new Date(end)
-  )
+  if (typeof start !== 'string' || typeof end !== 'string')
     throw new BadRequest('Incorrect input format for the range parameters!');
 
   const rangeInterviews = await InterviewModel.find(
     {
       date: {
-        $gte: new Date(start),
-        $lte: new Date(end),
+        $gte: new Date(parseInt(start)),
+        $lte: new Date(parseInt(end)),
       },
     },
     { createdAt: 0, updatedAt: 0, __v: 0 }
