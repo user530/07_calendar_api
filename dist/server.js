@@ -14,23 +14,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv_1 = __importDefault(require("dotenv"));
 const express_1 = __importDefault(require("express"));
+require("express-async-errors");
 const connect_1 = __importDefault(require("./db/connect"));
 const routers_1 = require("./routers");
+const middleware_1 = require("./middleware");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
-// Handler async errors
-require('express-async-errors');
 // Input sanitizer
 const sanitizer = require('express-mongo-sanitize');
 // JSON body parser
 app.use(express_1.default.json());
 // Sanitizer
 app.use(sanitizer());
-// === Setup ===
 // Routers
 app.use('/', routers_1.mainRouter);
 app.use('/api/v1/interviews', routers_1.interviewRouter);
 // Custom middleware
+app.use(middleware_1.NotFoundMiddleware);
+app.use(middleware_1.ErrorHandlerMiddleware);
 // Declare and invoke start
 void (function start() {
     return __awaiter(this, void 0, void 0, function* () {

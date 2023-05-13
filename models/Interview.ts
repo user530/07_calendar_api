@@ -1,29 +1,37 @@
-import { Schema, model, Types } from 'mongoose';
+import { Schema, model, InferSchemaType } from 'mongoose';
+import { BadRequest } from '../errors';
+import { dateIsVacant } from '../utils/validators';
 
-interface IInterview {
-  id: number;
-  date: Date;
-  position: string;
-  interviewee: string;
-}
+const InterviewSchema = new Schema(
+  {
+    date: {
+      type: Date,
+      required: true,
+    },
+    interviewee: {
+      type: String,
+      default: 'someName',
+    },
+    position: {
+      type: String,
+      default: 'somePosition',
+    },
+  },
+  { timestamps: true }
+);
 
-const InterviewSchema = new Schema<IInterview>({
-  id: {
-    type: Number,
-    required: true,
-  },
-  date: {
-    type: Date,
-    required: true,
-  },
-  interviewee: {
-    type: String,
-    default: 'someName',
-  },
-  position: {
-    type: String,
-    default: 'somePosition',
-  },
+type Interview = InferSchemaType<typeof InterviewSchema>;
+
+InterviewSchema.pre('save', async function (next): Promise<void> {
+  const interviews: Interview[] = await InterviewModel.find({});
+
+  const isVacant = dateIsVacant(interviews, this.date);
+
+  if (!isVacant) throw new BadRequest('Timeslot is already occupied!');
+
+  next();
 });
 
-export default model('Interview', InterviewSchema);
+const InterviewModel = model('Interview', InterviewSchema);
+
+export default InterviewModel;
