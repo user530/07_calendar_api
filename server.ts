@@ -19,6 +19,9 @@ const sanitizer = require('express-mongo-sanitize');
 app.use(cors());
 app.use(helmet());
 
+// Allow connection from different port
+app.set('trust proxy', '127.0.0.1');
+
 // Request limiter (500 req/ 15min)
 const limiter = rateLimiter({
   windowMs: 15 * 60 * 1000,
